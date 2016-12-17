@@ -1,1 +1,1 @@
-# U-Boot
+# U-Boot## Branch Namimg Specification(chip name)-U-Boot-(U-Boot version)* chip name: * i.MX6;   * AM335x;  *  U-Boot version: * v2009.11 * v2009.11.1E.g  i.MX6(chip name)-U-Boot-v2009.11(U-Boot version) = i.MX6-U-Boot-v2009.11## i.MX6 U-Boot## AM335x U-Boot
