@@ -19,7 +19,7 @@
 ## Release Naming Specification
 
 * **release naming format**: (branch name)-(release version)
-  * **branch name**: Reference to The previous section [`Branch Namimg Specification`](#user-content-release-naming-specification).
+  * **branch name**: Reference to The previous section [`Branch Namimg Specification`](#branch-namimg-specification).
   * **release version format**: `yy.MM.dd`(Release date of the day with format yy.MM.dd)`.sf`(Suffix for different version in a day. The default value is 00. In decimal upwards)
     * `v16.12.26`(v2016.12.26)`.00`(Release default(first) version in a day)
     * `v16.12.26`(v2016.12.26)`.01`(Release second version in a day)
