@@ -29,7 +29,7 @@
 
 ## SBC-7112S U-Boot
 
-[SBC-7112S-Linux-Uboot-v2009.08](https://github.com/AplexOS/U-Boot/tree/SBC-7112S-Linux-Uboot-v200908)
+[SBC-7112S-Linux-Uboot-v2009.08](https://github.com/AplexOS/U-Boot/tree/SBC-7112S-Linux-Uboot-v2009.08)
 
 ## SBC-7112S-Q U-Boot
 
