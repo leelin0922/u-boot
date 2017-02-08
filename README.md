@@ -35,3 +35,5 @@
 
 ## 5. SBC-7109S-454 U-Boot
 
+1. [SBC-7109S_Linux_Uboot-v2016.05](https://github.com/AplexOS/U-Boot/tree/SBC-7109S-Linux-Uboot-v2016.05)
+
