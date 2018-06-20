@@ -42,6 +42,14 @@ enum mxc_clock {
 	MXC_SATA_CLK,
 	MXC_NFC_CLK,
 	MXC_I2C_CLK,
+	MXC_IPU1_LVDS_DI0_CLK,
+	MXC_IPU1_LVDS_DI1_CLK,
+	MXC_IPU2_LVDS_DI0_CLK,
+	MXC_IPU2_LVDS_DI1_CLK,
+	MXC_IPU1_DI0_CLK,
+	MXC_IPU1_DI1_CLK,
+	MXC_IPU2_DI0_CLK,
+	MXC_IPU2_DI1_CLK,
 };
 
 enum enet_freq {
@@ -75,4 +83,6 @@ void enable_thermal_clk(void);
 void enable_epdc_clock(void);
 void mxs_set_lcdclk(u32 base_addr, u32 freq);
 void mxs_set_vadcclk(void);
+int display_clk_config(u32 clk_type, u32 freq);
+int display_split_clk_config(u32 clk_type, u32 freq);
 #endif /* __ASM_ARCH_CLOCK_H */

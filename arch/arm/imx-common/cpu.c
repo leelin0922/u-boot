@@ -174,6 +174,10 @@ const char *get_imx_type(u32 imxtype)
 	}
 }
 
+#ifdef CONFIG_SBC7112
+extern void set_LVDS_VCC(int status);
+#endif
+
 int print_cpuinfo(void)
 {
 	u32 cpurev;
@@ -181,6 +185,9 @@ int print_cpuinfo(void)
 #if defined(CONFIG_DBG_MONITOR)
 	struct dbg_monitor_regs *dbg =
 		(struct dbg_monitor_regs *)DEBUG_MONITOR_BASE_ADDR;
+#endif
+#ifdef CONFIG_SBC7112
+	set_LVDS_VCC(0);
 #endif
 
 	cpurev = get_cpu_rev();
@@ -300,7 +307,9 @@ void arch_preboot_os(void)
 #endif
 #if defined(CONFIG_VIDEO_IPUV3)
 	/* disable video before launching O/S */
+#ifndef CONFIG_SBC7112
 	ipuv3_fb_shutdown();
+#endif
 #endif
 #ifdef CONFIG_VIDEO_GIS
 	/* Entry for GIS */

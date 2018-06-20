@@ -11,6 +11,10 @@
 
 #include "mx6_common.h"
 
+#define CONFIG_SBC7112	1
+#define CONFIG_EEPROM_GPIO_I2C4
+#define LVDS_PORT		1
+
 /* uncomment for PLUGIN mode support */
 /* #define CONFIG_USE_PLUGIN */
 
@@ -394,7 +398,9 @@
 #define CONFIG_SPLASH_SCREEN
 #define CONFIG_SPLASH_SCREEN_ALIGN
 #define CONFIG_BMP_16BPP
-#define CONFIG_VIDEO_LOGO
+	#define CONFIG_FB_BASE	(CONFIG_SYS_TEXT_BASE + 0x1000000)
+	#define UBOOT_LOGO_BMP_ADDR 0x00100000
+/*#define CONFIG_VIDEO_LOGO*/
 #define CONFIG_VIDEO_BMP_LOGO
 #ifdef CONFIG_MX6DL
 #define CONFIG_IPUV3_CLK 198000000

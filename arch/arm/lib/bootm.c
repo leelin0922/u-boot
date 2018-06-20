@@ -31,7 +31,9 @@
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
-
+#ifdef CONFIG_SBC7112
+extern void disable_lvds_gpio(void);
+#endif
 static struct tag *params;
 
 static ulong get_sp(void)
@@ -71,20 +73,29 @@ void arch_lmb_reserve(struct lmb *lmb)
  */
 static void announce_and_cleanup(int fake)
 {
-	printf("\nStarting kernel ...%s\n\n", fake ?
+	printf("\nStarting kernel %s", fake ?
 		"(fake run for tracing)" : "");
+#ifdef CONFIG_SBC7112
+	printf(".1");
+	disable_lvds_gpio();
+#endif
+	printf(".2");
 	bootstage_mark_name(BOOTSTAGE_ID_BOOTM_HANDOFF, "start_kernel");
 #ifdef CONFIG_BOOTSTAGE_FDT
+	printf(".3");
 	bootstage_fdt_add_report();
 #endif
 #ifdef CONFIG_BOOTSTAGE_REPORT
+	printf(".4");
 	bootstage_report();
 #endif
 
 #ifdef CONFIG_USB_DEVICE
+	printf(".5");
 	udc_disconnect();
 #endif
 	cleanup_before_linux();
+	printf(".e\n");
 }
 
 static void setup_start_tag (bd_t *bd)
@@ -328,6 +339,7 @@ static void boot_jump_linux(bootm_headers_t *images, int flag)
 			kernel_entry(0, machid, r2);
 	}
 #endif
+	printf("boot_jump_linux ..end\n");
 }
 
 /* Main Entry point for arm bootm implementation
