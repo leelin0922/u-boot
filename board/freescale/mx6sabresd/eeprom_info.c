@@ -752,7 +752,7 @@ int Load_config_from_mmc(void)
 					read_boot_logo=(uchar)(atoi(ptr+5)&0xff);
 					if(read_boot_logo<1 || read_boot_logo>5)
 					{
-						read_boot_logo=1;
+						read_boot_logo=0;
 					}
 					AT24c02_eeprom.data.logo[0]=0x11;
 					AT24c02_eeprom.data.logo[1]=0x01;
@@ -792,7 +792,10 @@ unsigned char eeprom_i2c_pass_logo(void)
 {
 	return AT24c02_eeprom.show_pass_logo;
 }
-
+unsigned char eeprom_i2c_check_logo(void)
+{
+	return AT24c02_eeprom.data.logo[2];
+}
 unsigned char eeprom_i2c_get_EDID(void)
 {
 	return AT24c02_eeprom.data.display[2];
@@ -823,9 +826,13 @@ void set_kernel_env(int width, int height)
 		default:
 			AT24c02_eeprom.data.display[5]=0x01;
 			if(eeprom_i2c_get_EDID()==RESOLUTION_1920X1080)
-				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl1 video=mxcfb1:off video=mxcfb2:off vmalloc=384M", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24);
+			{
+				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+			}
 			else
-				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 video=mxcfb1:off video=mxcfb2:off vmalloc=256M", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24);
+			{
+				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=256M", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+			}
 			break;
 	}
 #ifdef MX6_SABRE_ANDROID_COMMON_H

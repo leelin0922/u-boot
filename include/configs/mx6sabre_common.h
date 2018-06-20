@@ -13,6 +13,8 @@
 
 #define CONFIG_SBC7112	1
 #define CONFIG_EEPROM_GPIO_I2C4
+#define LVDS_PORT		1
+
 /* uncomment for PLUGIN mode support */
 /* #define CONFIG_USE_PLUGIN */
 

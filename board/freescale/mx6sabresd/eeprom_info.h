@@ -76,6 +76,7 @@ unsigned char eeprom_i2c_get_type(void);
 unsigned char eeprom_i2c_get_EDID(void);
 unsigned char eeprom_i2c_get_color_depth(void);
 unsigned char eeprom_i2c_pass_logo(void);
+unsigned char eeprom_i2c_check_logo(void);
 void set_kernel_env(int width, int height);
 
 int eeprom_i2c_parse_data(void);

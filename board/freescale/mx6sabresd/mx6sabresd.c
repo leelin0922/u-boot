@@ -200,8 +200,16 @@ void set_panel_env(void)
 			break;
 	}
 	setenv("panel",tmpchar);
-	setenv("lvds_num","1");//lvds1 route to di 1
-	setenv("disp_num","1");//lvds1 route to di 1
+	if(LVDS_PORT==0)
+	{
+		setenv("lvds_num","0");//lvds0 route to di 0
+		setenv("disp_num","0");//lvds0 route to di 0
+	}
+	else
+	{
+		setenv("lvds_num","1");//lvds1 route to di 1
+		setenv("disp_num","1");//lvds1 route to di 1
+	}
 }
 
 void copy_bmp_screen(char * destaddr,char * srcaddr, int width,int high)
@@ -1009,7 +1017,7 @@ struct display_info_t const displays[] = {{
 		.vsync_len		= 5,
 		.sync			= 0,
 		.vmode			= FB_VMODE_NONINTERLACED
-} }, {//leelin
+} }, {
 	.bus	= 1,
 	.addr	= 0,
 	.pixfmt = IPU_PIX_FMT_RGB666,
@@ -1742,13 +1750,13 @@ static const struct boot_mode board_boot_modes[] = {
 };
 #endif
 
-static void customer_lvds(void)
+static void customer_lvds(int lvds_ipu,int lvds_di)
 {
 	unsigned int reg=0;
 	uchar color_depth=eeprom_i2c_get_color_depth();
 	uchar display_type=eeprom_i2c_get_type();
 	uchar display_edid=eeprom_i2c_get_EDID();
-#if 1
+#if 0
 	if(display_type== 1)
 	{
 		imx_iomux_set_gpr_register(3, 8, 2, 1);
@@ -1770,92 +1778,92 @@ static void customer_lvds(void)
 	}
 #else
 #if (LVDS_PORT == 0)
-		if(IPU == 1)
+		if(lvds_ipu == 1)
 		{
-			if(DI == 0)
+			if(lvds_di == 0)
 				imx_iomux_set_gpr_register(3, 6, 2, 0);
-			else if(DI == 1)
+			else if(lvds_di == 1)
 				imx_iomux_set_gpr_register(3, 6, 2, 1);
 		}
 	
-		if(IPU == 2)
+		if(lvds_ipu == 2)
 		{
-			if(DI == 0)
+			if(lvds_di == 0)
 				imx_iomux_set_gpr_register(3, 6, 2, 2);
-			else if(DI == 1)
+			else if(lvds_di == 1)
 				imx_iomux_set_gpr_register(3, 6, 2, 3);
 		}
 #endif
 	
 #if (LVDS_PORT == 1)
-		if(IPU == 1)
+		if(lvds_ipu == 1)
 		{
-			if(DI == 0)
+			if(lvds_di == 0)
 				imx_iomux_set_gpr_register(3, 8, 2, 0);
-			else if(DI == 1)
+			else if(lvds_di == 1)
 				imx_iomux_set_gpr_register(3, 8, 2, 1);
 		}
 	
-		if(IPU == 2)
+		if(lvds_ipu == 2)
 		{
-			if(DI == 0)
+			if(lvds_di == 0)
 				imx_iomux_set_gpr_register(3, 8, 2, 2);
-			else if(DI == 1)
+			else if(lvds_di == 1)
 				imx_iomux_set_gpr_register(3, 8, 2, 3);
 		}
 #endif
 	
 		reg = 0;
-		if (DI == 0)
-			reg |= (DISPLAY_VSYNC_POLARITY << 9);
-		else if(DI == 1)
-			reg |= (DISPLAY_VSYNC_POLARITY << 10);
+		if (lvds_di == 0)
+			reg |= (0x1 << 9);
+		else if(lvds_di == 1)
+			reg |= (0x1 << 10);
 	
 #if (LVDS_PORT == 0)
-#if (DISPLAY_IF_BPP == 24)
-		reg |= (1 << 5);
-#ifdef LVDS_SPLIT_MODE
-		reg |= (1 << 7);
-#endif
-#endif
+		if (color_depth == 24)
+		{
+			reg |= (1 << 5);
+			if (display_edid == RESOLUTION_1920X1080)
+				reg |= (1 << 7);
+		}
 	
-		if (DI == 0)
+		if (lvds_di == 0)
 			reg |= (1 << 0);
-		else if(DI == 1)
+		else if(lvds_di == 1)
 			reg |= (3 << 0);
 	
-#ifdef LVDS_SPLIT_MODE
-		reg |= (1 << 4);
-		if (DI == 0)
-			reg |= (1 << 2);
-		else if(DI == 1)
-			reg |= (3 << 2);
-#endif
+		if (display_edid == RESOLUTION_1920X1080)
+		{
+			reg |= (1 << 4);
+			if (lvds_di == 0)
+				reg |= (1 << 2);
+			else if(lvds_di == 1)
+				reg |= (3 << 2);
+		}
 #endif
 	
 #if (LVDS_PORT == 1)
-#if (DISPLAY_IF_BPP == 24)
-		reg |= (1 << 7);
-#ifdef LVDS_SPLIT_MODE
-		reg |= (1 << 5);
-#endif
-#endif
+		if (color_depth == 24)
+		{
+			reg |= (1 << 7);
+			if (display_edid == RESOLUTION_1920X1080)
+				reg |= (1 << 5);
+		}
 	
-		if (DI == 0)
+		if (lvds_di == 0)
 			reg |= (1 << 2);
-		else if(DI == 1)
+		else if(lvds_di == 1)
 			reg |= (3 << 2);
-#ifdef LVDS_SPLIT_MODE
-		reg |= (1 << 4);
-		if (DI == 0)
-			reg |= (1 << 0);
-		else if(DI == 1)
-			reg |= (3 << 0);
+		if (display_edid == RESOLUTION_1920X1080)
+		{
+			reg |= (1 << 4);
+			if (lvds_di == 0)
+				reg |= (1 << 0);
+			else if(lvds_di == 1)
+				reg |= (3 << 0);
+		}
 #endif
-#endif
-	
 		writel(reg, IOMUXC_BASE_ADDR + 0x8);  //Set LDB_CTRL
-
 #endif
 	return;
 }
@@ -1868,10 +1876,8 @@ int board_late_init(void)
 	unsigned int size = DISPLAY_WIDTH * DISPLAY_HEIGHT * (DISPLAY_BPP / 8);
 	unsigned int start, count;
 	int i, bmpReady = 0;
-#if 1
 	int mmc_dev = mmc_get_env_devno();
 	struct mmc *mmc = find_mmc_device(mmc_dev);
-#endif
 
 	pData = (unsigned char *)CONFIG_FB_BASE;
 #if 0
@@ -1944,10 +1950,19 @@ int board_late_init(void)
 #endif
 
 	ipu_display_setup(IPU_NUM, DI_NUM);
-#else	//test
-	customer_lvds();
+#else
 	pData = (unsigned char *)CONFIG_FB_BASE;
-	clocksource=MXC_IPU1_LVDS_DI1_CLK;
+ 	if(LVDS_PORT==1)
+ 	{
+		clocksource=MXC_IPU1_LVDS_DI1_CLK;//MXC_IPU1_LVDS_DI0_CLK,MXC_IPU1_LVDS_DI1_CLK		
+		customer_lvds(1,1);
+	}
+	else
+	{
+		clocksource=MXC_IPU1_LVDS_DI0_CLK;
+		customer_lvds(1,0);
+	}
+
 	switch(eeprom_i2c_get_EDID())
 	{
 		//setenv("bootargs","console=ttymxc0,115200 init=/init video=mxcfb0:dev=ldb,800x480M@70,if=RGB666,bpp=32 video=mxcfb1:off video=mxcfb2:off fbmem=40M fb0base=0x27b00000 vmalloc=400M androidboot.console=ttymxc0 androidboot.hardware=freescale mem=1024M\0");
@@ -2020,9 +2035,12 @@ int board_late_init(void)
 	board_late_mmc_env_init();
 #endif
 
-	//gpio_direction_output(IMX_GPIO_NR(6, 15), 1);
-	//gpio_direction_output(IMX_GPIO_NR(6, 16), 1);
-	//puts("Enable gpio 6,15\n");
+	if(eeprom_i2c_check_logo())
+	{
+		gpio_direction_output(IMX_GPIO_NR(6, 15), 1);
+		gpio_direction_output(IMX_GPIO_NR(6, 16), 1);
+		//puts("Enable gpio 6,15, 6,16\n");
+	}
 	return 0;
 }
 

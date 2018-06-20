@@ -1751,8 +1751,8 @@ int display_clk_config(u32 clk_type, u32 freq)
 {
 	switch (clk_type) {
 	case MXC_IPU1_LVDS_DI0_CLK:
-		//if (config_lvds_clk(1, 0, freq*7))
-		if (config_lvds_split_clk(1, 0, freq*7))
+		if (config_lvds_clk(1, 0, freq*7))
+		//if (config_lvds_split_clk(1, 0, freq*7))
 			return -1;
 		break;
 	case MXC_IPU1_LVDS_DI1_CLK:
