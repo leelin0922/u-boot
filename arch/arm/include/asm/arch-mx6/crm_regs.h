@@ -64,7 +64,10 @@ struct mxc_ccm_reg {
 	u32 analog_usb1_pll_480_ctrl_set;
 	u32 analog_usb1_pll_480_ctrl_clr;
 	u32 analog_usb1_pll_480_ctrl_tog;
-	u32 analog_reserved0[4];
+	u32 analog_usb2_pll_480_ctrl;	/* 0x4020 */
+	u32 analog_usb2_pll_480_ctrl_set;
+	u32 analog_usb2_pll_480_ctrl_clr;
+	u32 analog_usb2_pll_480_ctrl_tog;
 	u32 analog_pll_528;			/* 0x4030 */
 	u32 analog_pll_528_set;
 	u32 analog_pll_528_clr;
@@ -90,7 +93,11 @@ struct mxc_ccm_reg {
 	u32 analog_pll_video_num;		/* 0x40b0 */
 	u32 analog_reserved6[3];
 	u32 analog_pll_video_denom;		/* 0x40c0 */
-	u32 analog_reserved7[7];
+	u32 analog_reserved7[3];
+	u32 analog_pll_mlb;		        /* 0x40d0 */
+	u32 analog_pll_mlb_set;
+	u32 analog_pll_mlb_clr;
+	u32 analog_pll_mlb_tog;
 	u32 analog_pll_enet;			/* 0x40e0 */
 	u32 analog_pll_enet_set;
 	u32 analog_pll_enet_clr;
@@ -1348,5 +1355,49 @@ struct mxc_ccm_reg {
 	(BP_PMU_MISC2_AUDIO_DIV_MSB - 1)) | \
 	((v & BM_PMU_MISC2_AUDIO_DIV_LSB) >> \
 	 BP_PMU_MISC2_AUDIO_DIV_LSB))
+
+#define BP_ANADIG_ANA_MISC2_CONTROL3      30
+#define BM_ANADIG_ANA_MISC2_CONTROL3 0xC0000000
+#define BF_ANADIG_ANA_MISC2_CONTROL3(v) \
+	(((v) << 30) & BM_ANADIG_ANA_MISC2_CONTROL3)
+#define BP_ANADIG_ANA_MISC2_REG2_STEP_TIME      28
+#define BM_ANADIG_ANA_MISC2_REG2_STEP_TIME 0x30000000
+#define BF_ANADIG_ANA_MISC2_REG2_STEP_TIME(v)  \
+	(((v) << 28) & BM_ANADIG_ANA_MISC2_REG2_STEP_TIME)
+#define BP_ANADIG_ANA_MISC2_REG1_STEP_TIME      26
+#define BM_ANADIG_ANA_MISC2_REG1_STEP_TIME 0x0C000000
+#define BF_ANADIG_ANA_MISC2_REG1_STEP_TIME(v)  \
+	(((v) << 26) & BM_ANADIG_ANA_MISC2_REG1_STEP_TIME)
+#define BP_ANADIG_ANA_MISC2_REG0_STEP_TIME      24
+#define BM_ANADIG_ANA_MISC2_REG0_STEP_TIME 0x03000000
+#define BF_ANADIG_ANA_MISC2_REG0_STEP_TIME(v)  \
+	(((v) << 24) & BM_ANADIG_ANA_MISC2_REG0_STEP_TIME)
+#define BM_ANADIG_ANA_MISC2_CONTROL2 0x00800000
+#define BM_ANADIG_ANA_MISC2_REG2_OK 0x00400000
+#define BM_ANADIG_ANA_MISC2_REG2_ENABLE_BO 0x00200000
+#define BM_ANADIG_ANA_MISC2_RSVD2 0x00100000
+#define BM_ANADIG_ANA_MISC2_REG2_BO_STATUS 0x00080000
+#define BP_ANADIG_ANA_MISC2_REG2_BO_OFFSET      16
+#define BM_ANADIG_ANA_MISC2_REG2_BO_OFFSET 0x00070000
+#define BF_ANADIG_ANA_MISC2_REG2_BO_OFFSET(v)  \
+	(((v) << 16) & BM_ANADIG_ANA_MISC2_REG2_BO_OFFSET)
+#define BM_ANADIG_ANA_MISC2_CONTROL1 0x00008000
+#define BM_ANADIG_ANA_MISC2_REG1_OK 0x00004000
+#define BM_ANADIG_ANA_MISC2_REG1_ENABLE_BO 0x00002000
+#define BM_ANADIG_ANA_MISC2_RSVD1 0x00001000
+#define BM_ANADIG_ANA_MISC2_REG1_BO_STATUS 0x00000800
+#define BP_ANADIG_ANA_MISC2_REG1_BO_OFFSET      8
+#define BM_ANADIG_ANA_MISC2_REG1_BO_OFFSET 0x00000700
+#define BF_ANADIG_ANA_MISC2_REG1_BO_OFFSET(v)  \
+	(((v) << 8) & BM_ANADIG_ANA_MISC2_REG1_BO_OFFSET)
+#define BM_ANADIG_ANA_MISC2_CONTROL0 0x00000080
+#define BM_ANADIG_ANA_MISC2_REG0_OK 0x00000040
+#define BM_ANADIG_ANA_MISC2_REG0_ENABLE_BO 0x00000020
+#define BM_ANADIG_ANA_MISC2_RSVD0 0x00000010
+#define BM_ANADIG_ANA_MISC2_REG0_BO_STATUS 0x00000008
+#define BP_ANADIG_ANA_MISC2_REG0_BO_OFFSET      0
+#define BM_ANADIG_ANA_MISC2_REG0_BO_OFFSET 0x00000007
+#define BF_ANADIG_ANA_MISC2_REG0_BO_OFFSET(v)  \
+	(((v) << 0) & BM_ANADIG_ANA_MISC2_REG0_BO_OFFSET)
 
 #endif /*__ARCH_ARM_MACH_MX6_CCM_REGS_H__ */

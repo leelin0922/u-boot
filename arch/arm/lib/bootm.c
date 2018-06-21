@@ -31,7 +31,9 @@
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
-
+#ifdef CONFIG_SBC7112
+extern void lvds_backlight(int status);
+#endif
 static struct tag *params;
 
 static ulong get_sp(void)
@@ -75,8 +77,11 @@ __weak void board_quiesce_devices(void)
  */
 static void announce_and_cleanup(int fake)
 {
-	printf("\nStarting kernel ...%s\n\n", fake ?
+	printf("\nStarting kernel ...arm%s", fake ?
 		"(fake run for tracing)" : "");
+#ifdef CONFIG_SBC7112
+	lvds_backlight(0);
+#endif
 	bootstage_mark_name(BOOTSTAGE_ID_BOOTM_HANDOFF, "start_kernel");
 #ifdef CONFIG_BOOTSTAGE_FDT
 	bootstage_fdt_add_report();
@@ -92,6 +97,7 @@ static void announce_and_cleanup(int fake)
 	board_quiesce_devices();
 
 	cleanup_before_linux();
+	printf(".e\n");
 }
 
 static void setup_start_tag (bd_t *bd)

@@ -42,6 +42,14 @@ enum mxc_clock {
 	MXC_SATA_CLK,
 	MXC_NFC_CLK,
 	MXC_I2C_CLK,
+	MXC_IPU1_LVDS_DI0_CLK,
+	MXC_IPU1_LVDS_DI1_CLK,
+	MXC_IPU2_LVDS_DI0_CLK,
+	MXC_IPU2_LVDS_DI1_CLK,
+	MXC_IPU1_DI0_CLK,
+	MXC_IPU1_DI1_CLK,
+	MXC_IPU2_DI0_CLK,
+	MXC_IPU2_DI1_CLK,
 };
 
 enum ldb_di_clock {
@@ -85,4 +93,6 @@ void mxs_set_lcdclk(u32 base_addr, u32 freq);
 void select_ldb_di_clock_source(enum ldb_di_clock clk);
 void enable_eim_clk(unsigned char enable);
 void mxs_set_vadcclk(void);
+int display_clk_config(u32 clk_type, u32 freq);
+int display_split_clk_config(u32 clk_type, u32 freq);
 #endif /* __ASM_ARCH_CLOCK_H */

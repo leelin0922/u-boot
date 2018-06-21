@@ -7,3 +7,5 @@
 #
 
 obj-y  := mx6sabresd.o
+
+obj-y	+= eeprom_info.o
