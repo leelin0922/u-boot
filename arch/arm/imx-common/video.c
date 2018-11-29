@@ -13,7 +13,9 @@ int board_video_skip(void)
 {
 	int i;
 	int ret;
+	char *s=getenv("disp_num");
 	char const *panel = getenv("panel");
+	int disp_num= s ? (int)simple_strtol(s, NULL, 10) : 0;
 
 	if (!panel) {
 		for (i = 0; i < display_count; i++) {
@@ -38,7 +40,8 @@ int board_video_skip(void)
 
 	if (i < display_count) {
 #if defined(CONFIG_VIDEO_IPUV3)
-		ret = ipuv3_fb_init(&displays[i].mode, displays[i].di ? 1 : 0,
+		//ret = ipuv3_fb_init(&displays[i].mode, displays[i].di ? 1 : 0,
+		ret = ipuv3_fb_init(&displays[i].mode, disp_num,
 				    displays[i].pixfmt);
 #elif defined(CONFIG_VIDEO_IMXDPUV1)
 		ret = imxdpuv1_fb_init(&displays[i].mode, displays[i].bus,
