@@ -24,6 +24,7 @@ extern int fat_register_device(struct blk_desc *dev_desc, int part_no);
 extern int file_fat_read(const char *filename, void *buffer, int maxsize);
 extern void puts(const char *str);
 extern void udelay(unsigned long usec);
+//#define CONFIG_GALCORE_VIVANTE 
 
 #ifdef CONFIG_EDID_EEPROM_I2C2
 // variable
@@ -916,7 +917,11 @@ void set_kernel_env(int width, int height)
 	switch(AT24c02_eeprom.data.display[5])
 	{//0x01:lvds, 0x02:hdmi, 0x03:RGB
 		case 0x02:
+#ifdef CONFIG_GALCORE_VIVANTE
 			sprintf(videoprm,"video=mxcfb0:dev=hdmi,%dx%dM@%u,if=RGB%d,bpp=32 video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24);
+#else
+			sprintf(videoprm,"video=mxcfb0:dev=hdmi,%dx%dM@%u,if=RGB%d,bpp=32 video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24);
+#endif
 //			sprintf(videoprm,"video=mxcfb0:dev=hdmi,%dx%dM@%u,if=RGB24,bpp=32 video=mxcfb1:off video=mxcfb2:off vmalloc=%dM", width, height, AT24c02_eeprom.data.display[4],192+24*AT24c02_eeprom.data.display[2]);
 			break;
 		case 0x01:
@@ -925,57 +930,81 @@ void set_kernel_env(int width, int height)
 #ifndef CONFIG_EDID_EEPROM_I2C2
 			if(eeprom_i2c_get_EDID()==RESOLUTION_1920X1080)
 			{
-				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#ifdef CONFIG_GALCORE_VIVANTE
+				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#else
+				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#endif
 			}
 			else
 			{
+	#ifdef CONFIG_GALCORE_VIVANTE
 				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#else
+				sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#endif
 			}
 #else
 			// use EDID config
 			if(edid_eeprom.efficient_config == 0) 
 			{
 				if(get_edid_eeprom_resolution_num() == RESOLUTION_1920X1080)
+	#ifdef CONFIG_GALCORE_VIVANTE
 					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, edid_eeprom.mode.refresh, edid_eeprom.color_depth == 18 ? 666 : 24, LVDS_PORT);
+	#else
+					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, edid_eeprom.mode.refresh, edid_eeprom.color_depth == 18 ? 666 : 24, LVDS_PORT);
+	#endif
 				else
+	#ifdef CONFIG_GALCORE_VIVANTE
 					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, edid_eeprom.mode.refresh, edid_eeprom.color_depth == 18 ? 666 : 24, LVDS_PORT);
+	#else
+					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, edid_eeprom.mode.refresh, edid_eeprom.color_depth == 18 ? 666 : 24, LVDS_PORT);
+	#endif
 			}
 			else 
 			{ 
 				// use SD card config
 				if(eeprom_i2c_get_EDID()==RESOLUTION_1920X1080)
+	#ifdef CONFIG_GALCORE_VIVANTE
 					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#else
+					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=spl%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#endif
 				else
+	#ifdef CONFIG_GALCORE_VIVANTE
 					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M galcore.gpuProfiler=1 ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#else
+					sprintf(videoprm,"video=mxcfb0:dev=ldb,%dx%dM@%u,if=RGB%d,bpp=32 ldb=sin%d video=mxcfb1:off video=mxcfb2:off vmalloc=384M ", width, height, AT24c02_eeprom.data.display[4], AT24c02_eeprom.data.display[3]==18?666:24, LVDS_PORT);
+	#endif
 			}
 #endif
 			break;
 	}
 #ifdef MX6_SABRE_ANDROID_COMMON_H
-#ifdef CONSOLE_READWRITE_ABLE
-	#ifdef CMDLINE_ADD_QUIET
+	#ifdef CONSOLE_READWRITE_ABLE
+		#ifdef CMDLINE_ADD_QUIET
 	sprintf(consoleprm,"androidboot.console=ttymxc0 androidboot.selinux=disabled consoleblank=0 quiet");
-	#else
+		#else
 	sprintf(consoleprm,"androidboot.console=ttymxc0 androidboot.selinux=disabled consoleblank=0");
-	#endif
-#else
-	#ifdef CMDLINE_ADD_QUIET
-	sprintf(consoleprm,"androidboot.console=ttymxc0 consoleblank=0 quiet");
+		#endif
 	#else
+		#ifdef CMDLINE_ADD_QUIET
+	sprintf(consoleprm,"androidboot.console=ttymxc0 consoleblank=0 quiet");
+		#else
 	sprintf(consoleprm,"androidboot.console=ttymxc0 consoleblank=0");
+		#endif
 	#endif
-#endif
 	if(AT24c02_eeprom.data.backlight[0]==0x04 && AT24c02_eeprom.data.backlight[1]==0x04)
 	{
 		int check_backlight_frequency=AT24c02_eeprom.data.backlight[4]*256+AT24c02_eeprom.data.backlight[5];
-#ifdef CONFIG_SBC7819
+	#ifdef CONFIG_SBC7819
 		check_backlight_frequency=200;
-#endif
-#ifndef BACKLIGHT_MAX
+	#endif
+	#ifndef BACKLIGHT_MAX
 		sprintf(Backlightprm," Backlight_polarity=%d,Backlight_min=%d,Backlight_frequency=%d",AT24c02_eeprom.data.backlight[2]?1:0,AT24c02_eeprom.data.backlight[3],check_backlight_frequency);
-#else
+	#else
 		sprintf(Backlightprm," Backlight_polarity=%d,Backlight_min=%d,Backlight_frequency=%d,Backlight_max=%d",AT24c02_eeprom.data.backlight[2]?1:0,AT24c02_eeprom.data.backlight[3],check_backlight_frequency,AT24c02_eeprom.data.backlight[6]);
-#endif
+	#endif
 		sprintf(envprm,"console=ttymxc0,115200 init=/init %s %s %s androidboot.hardware=freescale cma=384M usbcore.autosuspend=-1",videoprm,consoleprm,Backlightprm);
 	}
 	else
@@ -988,27 +1017,27 @@ void set_kernel_env(int width, int height)
 	if(AT24c02_eeprom.data.backlight[0]==0x04 && AT24c02_eeprom.data.backlight[1]>=0x04)
 	{
 		int check_backlight_frequency=AT24c02_eeprom.data.backlight[4]*256+AT24c02_eeprom.data.backlight[5];
-#ifdef CONFIG_SBC7819
+	#ifdef CONFIG_SBC7819
 		check_backlight_frequency=200;
-#endif
-#ifndef BACKLIGHT_MAX
+	#endif
+	#ifndef BACKLIGHT_MAX
 		sprintf(Backlightprm," Backlight_polarity=%d,Backlight_min=%d,Backlight_frequency=%d",AT24c02_eeprom.data.backlight[2]?1:0,AT24c02_eeprom.data.backlight[3],check_backlight_frequency);
-#else
+	#else
 		sprintf(Backlightprm," Backlight_polarity=%d,Backlight_min=%d,Backlight_frequency=%d,Backlight_max=%d",AT24c02_eeprom.data.backlight[2]?1:0,AT24c02_eeprom.data.backlight[3],check_backlight_frequency,AT24c02_eeprom.data.backlight[6]);
-#endif
-#ifdef CMDLINE_ADD_QUIET
+	#endif
+	#ifdef CMDLINE_ADD_QUIET
 		sprintf(envprm,"setenv bootargs console=${console},${baudrate} ${smp} root=${mmcroot} %s %s cma=384M usbcore.autosuspend=-1 quiet",videoprm,Backlightprm);
-#else
+	#else
 		sprintf(envprm,"setenv bootargs console=${console},${baudrate} ${smp} root=${mmcroot} %s %s cma=384M usbcore.autosuspend=-1",videoprm,Backlightprm);
-#endif
+	#endif
 	}
 	else
 	{
-#ifdef CMDLINE_ADD_QUIET
+	#ifdef CMDLINE_ADD_QUIET
 		sprintf(envprm,"setenv bootargs console=${console},${baudrate} ${smp} root=${mmcroot} %s cma=384M usbcore.autosuspend=-1 quiet",videoprm);
-#else
+	#else
 		sprintf(envprm,"setenv bootargs console=${console},${baudrate} ${smp} root=${mmcroot} %s cma=384M usbcore.autosuspend=-1",videoprm);
-#endif
+	#endif
 	}
 	setenv("mmcargs",envprm);
 #endif
