@@ -955,7 +955,7 @@ void set_kernel_env(int width, int height)
 			//sprintf(videoprm,"video=mxcfb0:dev=lcd,CLAA-WVGA,if=RGB%d ", AT24c02_eeprom.data.display[3]==18?666:24);
 			//sprintf(videoprm,"video=mxsfb:dev=lcd,CLAA-WVGA,if=RGB666 ");
 #endif
-			sprintf(videoprm,"video=mxsfb:%dx%dM-%d@%u,pixclockpol=1 ", width, height, AT24c02_eeprom.data.display[3], AT24c02_eeprom.data.display[4]);
+			sprintf(videoprm,"video=mxsfb:dev=lcd,%dx%dM-%d@%u,pixclockpol=1 ", width, height, AT24c02_eeprom.data.display[3], AT24c02_eeprom.data.display[4]);
 			//sprintf(videoprm,"video=mxcfb0:dev=lcd,%dx%dM@%u,if=RGB24,bpp=32 video=mxcfb1:off video=mxcfb2:off fbmem=%dM", width, height, AT24c02_eeprom.data.display[4],192+24*AT24c02_eeprom.data.display[2]);
 			break;
 		case 0x02:

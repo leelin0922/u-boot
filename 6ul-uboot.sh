@@ -16,9 +16,9 @@ make clean
 make mx6ul_14x14_evk_emmc_defconfig
 make 
 #make
-echo "copy image (:u-boot.imx"
-cp -rf u-boot-dtb.imx "$outputdir"u-boot.imx
-cp -rf u-boot-dtb.imx /tftpboot/u-boot.imx
+echo cp u-boot-dtb.imx "$outputdir"u-boot.imx
+cp u-boot-dtb.imx "$outputdir"u-boot.imx
+cp u-boot-dtb.imx /tftpboot/u-boot.imx
 
 sync
 sleep 1
