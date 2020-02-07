@@ -39,6 +39,8 @@
 #endif
 #endif /*CONFIG_FSL_FASTBOOT*/
 
+#include "eeprom_info.h"
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #define UART_PAD_CTRL  (PAD_CTL_PKE | PAD_CTL_PUE |		\
@@ -84,6 +86,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define IOX_STCP IMX_GPIO_NR(5, 7)
 #define IOX_SHCP IMX_GPIO_NR(5, 11)
 #define IOX_OE IMX_GPIO_NR(5, 8)
+void set_panel_env(void);
 
 static iomux_v3_cfg_t const iox_pads[] = {
 	/* IOX_SDI */
@@ -179,14 +182,20 @@ static void iox74lv_init(void)
 /* I2C1 for PMIC and EEPROM */
 static struct i2c_pads_info i2c_pad_info1 = {
 	.scl = {
-		.i2c_mode =  MX6_PAD_UART4_TX_DATA__I2C1_SCL | PC,
-		.gpio_mode = MX6_PAD_UART4_TX_DATA__GPIO1_IO28 | PC,
-		.gp = IMX_GPIO_NR(1, 28),
+		//.i2c_mode =  MX6_PAD_UART4_TX_DATA__I2C1_SCL | PC,
+		//.gpio_mode = MX6_PAD_UART4_TX_DATA__GPIO1_IO28 | PC,
+		//.gp = IMX_GPIO_NR(1, 28),
+		.i2c_mode =  MX6UL_PAD_CSI_PIXCLK__I2C1_SCL | PC,
+		.gpio_mode = MX6UL_PAD_CSI_PIXCLK__GPIO4_IO18 | PC,
+		.gp = IMX_GPIO_NR(4, 18),
 	},
 	.sda = {
-		.i2c_mode = MX6_PAD_UART4_RX_DATA__I2C1_SDA | PC,
-		.gpio_mode = MX6_PAD_UART4_RX_DATA__GPIO1_IO29 | PC,
-		.gp = IMX_GPIO_NR(1, 29),
+		//.i2c_mode = MX6_PAD_UART4_RX_DATA__I2C1_SDA | PC,
+		//.gpio_mode = MX6_PAD_UART4_RX_DATA__GPIO1_IO29 | PC,
+		//.gp = IMX_GPIO_NR(1, 29),
+		.i2c_mode = MX6UL_PAD_CSI_MCLK__I2C1_SDA | PC,
+		.gpio_mode = MX6UL_PAD_CSI_MCLK__GPIO4_IO17 | PC,
+		.gp = IMX_GPIO_NR(4, 17),
 	},
 };
 
@@ -803,6 +812,9 @@ static iomux_v3_cfg_t const lcd_pads[] = {
 
 void do_enable_parallel_lcd(struct display_info_t const *dev)
 {
+	int ret;
+	unsigned int gpio;
+
 	enable_lcdif_clock(dev->bus, 1);
 
 	imx_iomux_v3_setup_multiple_pads(lcd_pads, ARRAY_SIZE(lcd_pads));
@@ -816,6 +828,18 @@ void do_enable_parallel_lcd(struct display_info_t const *dev)
 	/* Set Brightness to high */
 	gpio_request(IMX_GPIO_NR(1, 8), "backlight");
 	gpio_direction_output(IMX_GPIO_NR(1, 8) , 1);
+
+	ret = gpio_lookup_name("gpio_spi@0_7", NULL, NULL, &gpio);
+	if (ret) {
+		printf("GPIO: 'gpio_spi@0_7' not found\n");
+	}
+
+	ret = gpio_request(gpio, "lcd_enable");
+	if (ret && ret != -EBUSY) {
+		printf("gpio: requesting pin %u failed\n", gpio);
+	}
+	gpio_direction_output(gpio, 1);
+
 }
 
 struct display_info_t const displays[] = {{
@@ -837,6 +861,146 @@ struct display_info_t const displays[] = {{
 		.vsync_len      = 10,
 		.sync           = 0,
 		.vmode          = FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt	= 24,
+	.detect	= NULL,
+	.enable	= do_enable_parallel_lcd,
+	.mode	= {
+		.name           = "panel640x480d24",
+		.refresh		= 70,
+		.xres			= 640,
+		.yres			= 480,
+		.pixclock		= 26143,
+		.left_margin	= 200,
+		.right_margin	= 109,
+		.upper_margin	= 15,
+		.lower_margin	= 15,
+		.hsync_len		= 80,
+		.vsync_len		= 21,
+		.sync			= 0,
+		.vmode          = FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt = 24,
+	.detect = NULL,
+	.enable = do_enable_parallel_lcd,
+	.mode	= {
+		.name			= "panel800x480d24",
+		.refresh		= 60,
+		.xres			= 800,
+		.yres			= 480,
+		.pixclock		= 29850,
+		.left_margin	= 89,
+		.right_margin	= 164,
+		.upper_margin	= 23,
+		.lower_margin	= 10,
+		.hsync_len		= 10,
+		.vsync_len		= 10,
+		.sync			= 0,
+		.vmode			= FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt = 24,
+	.detect = NULL,
+	.enable = do_enable_parallel_lcd,
+	.mode	= {
+		.name			= "panel800x600d24",
+		.refresh		= 59,
+		.xres			= 800,
+		.yres			= 600,
+		.pixclock		= 26143,
+		.left_margin	= 110,
+		.right_margin	= 39,
+		.upper_margin	= 5,
+		.lower_margin	= 20,
+		.hsync_len		= 80,
+		.vsync_len		= 5,
+		.sync			= 0,
+		.vmode			= FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt = 24,
+	.detect = NULL,
+	.enable = do_enable_parallel_lcd,
+	.mode	= {
+		.name			= "panel1024x600d24",
+		.refresh		= 58,
+		.xres			= 1024,
+		.yres			= 600,
+		.pixclock		= 20623,
+		.left_margin	= 147,
+		.right_margin	= 48,
+		.upper_margin	= 6,	
+		.lower_margin	= 20,
+		.hsync_len		= 104,
+		.vsync_len		= 6,
+		.sync			= 0,
+		.vmode			= FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt = 24,
+	.detect = NULL,
+	.enable = do_enable_parallel_lcd,
+	.mode	= {
+		.name			= "panel1024x768d24",
+		.refresh		= 60,
+		.xres			= 1024,
+		.yres			= 768,
+		.pixclock		= 15748,
+		.left_margin	= 147,	
+		.right_margin	= 48,
+		.upper_margin	= 5,	
+		.lower_margin	= 21,
+		.hsync_len		= 104,
+		.vsync_len		= 5,
+		.sync			= 0,
+		.vmode			= FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt = 24,
+	.detect = NULL,
+	.enable = do_enable_parallel_lcd,
+	.mode	= {
+		.name			= "panel1280x800d24",
+		.refresh		= 60,
+		.xres			= 1280,
+		.yres			= 800,
+		.pixclock		= 11784,
+		.left_margin	= 200,
+		.right_margin	= 72,
+		.upper_margin	= 22,
+		.lower_margin	= 10,
+		.hsync_len		= 128,
+		.vsync_len		= 10,
+		.sync			= 0,
+		.vmode			= FB_VMODE_NONINTERLACED
+} }, {
+	.bus = MX6UL_LCDIF1_BASE_ADDR,
+	.addr	= 0,
+	.pixfmt = 24,
+	.detect = NULL,
+	.enable = do_enable_parallel_lcd,
+	.mode	= {
+		.name			= "panel1366x768d24",
+		.refresh		= 60,
+		.xres			= 1366,
+		.yres			= 768,
+		.pixclock		= 13257,
+		.left_margin	= 50,
+		.right_margin	= 50,
+		.upper_margin	= 9,
+		.lower_margin	= 9,
+		.hsync_len		= 94,
+		.vsync_len		= 20,
+		.sync			= 0,
+		.vmode			= FB_VMODE_NONINTERLACED
 } } };
 size_t display_count = ARRAY_SIZE(displays);
 #endif
@@ -862,7 +1026,7 @@ int board_init(void)
 #ifdef CONFIG_SYS_I2C
 	setup_i2c(0, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info1);
 #endif
-
+	eeprom_i2c_init();
 #ifdef	CONFIG_FEC_MXC
 	setup_fec(CONFIG_FEC_ENET_DEV);
 #endif
@@ -893,6 +1057,57 @@ static const struct boot_mode board_boot_modes[] = {
 	{NULL,	 0},
 };
 #endif
+
+void set_panel_env(void)
+{
+	char tmpchar[128]={0};
+
+	Load_config_from_mmc();
+
+	uchar color_depth=eeprom_i2c_get_color_depth();
+	//color_depth=24;
+	switch(eeprom_i2c_get_EDID())
+	{
+		case RESOLUTION_640X480:
+			set_kernel_env(640,480);
+			sprintf(tmpchar,"panel640x480d%d",color_depth);
+			break;
+		case RESOLUTION_800X480:
+			set_kernel_env(800,480);
+			sprintf(tmpchar,"panel800x480d%d",color_depth);
+			break;
+		case RESOLUTION_800X600:
+			set_kernel_env(800,600);
+			sprintf(tmpchar,"panel800x600d%d",color_depth);
+			break;
+		case RESOLUTION_1024X600:
+			set_kernel_env(1024,600);
+			sprintf(tmpchar,"panel1024x600d%d",color_depth);
+			break;
+		case RESOLUTION_1024X768:
+			set_kernel_env(1024,768);
+			sprintf(tmpchar,"panel1024x768d%d",color_depth);
+			break;
+		case RESOLUTION_1280X800:
+			set_kernel_env(1280,800);
+			sprintf(tmpchar,"panel1280x800d%d",color_depth);
+			break;
+		case RESOLUTION_1366X768:
+			set_kernel_env(1366,768);
+			sprintf(tmpchar,"panel1366x768d%d",color_depth);
+			break;
+		//case RESOLUTION_1920X1080:
+		//	set_kernel_env(1920,1080);
+		//	sprintf(tmpchar,"panel1920x1080d%d",color_depth);
+		//	break;
+		default:
+			set_kernel_env(800,480);
+			sprintf(tmpchar,"panel800x480d24");
+			puts("set_panel_env error\n"); 
+			break;
+	}
+	setenv("panel",tmpchar);
+}
 
 int board_late_init(void)
 {

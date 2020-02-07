@@ -4,3 +4,5 @@
 #
 
 obj-y  := mx6ul_14x14_evk.o
+
+obj-y	+= eeprom_info.o

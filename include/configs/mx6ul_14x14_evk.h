@@ -131,12 +131,14 @@
 	"console=ttymxc0\0" \
 	"fdt_high=0xffffffff\0" \
 	"initrd_high=0xffffffff\0" \
-	"fdt_file=undefined\0" \
+	"fdt_file=imx6ul-14x14-evk.dtb\0" \
 	"fdt_addr=0x83000000\0" \
 	"tee_addr=0x84000000\0" \
 	"tee_file=undefined\0" \
 	"boot_fdt=try\0" \
-	"ip_dyn=yes\0" \
+	"ip_dyn=no\0" \
+	"ipaddr=192.168.20.20\0" \
+	"serverip=192.168.20.168\0" \
 	"panel=TFT43AB\0" \
 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
 	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
@@ -269,7 +271,7 @@
 #define CONFIG_ENV_IS_IN_MMC
 #endif
 
-#define CONFIG_SYS_MMC_ENV_DEV		1   /* USDHC2 */
+#define CONFIG_SYS_MMC_ENV_DEV		0   /* USDHC2 */
 #define CONFIG_SYS_MMC_ENV_PART		0	/* user area */
 #define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
 
@@ -325,17 +327,18 @@
 #define CONFIG_USB_HOST_ETHER
 #define CONFIG_USB_ETHER_ASIX
 #define CONFIG_MXC_USB_PORTSC		(PORT_PTS_UTMI | PORT_PTS_PTW)
+#define CONFIG_USB_MAX_CONTROLLER_COUNT 2
 #endif
 
 #ifdef CONFIG_CMD_NET
 #define CONFIG_CMD_MII
 #define CONFIG_FEC_MXC
 #define CONFIG_MII
-#define CONFIG_FEC_ENET_DEV		1
+#define CONFIG_FEC_ENET_DEV		0
 
 #if (CONFIG_FEC_ENET_DEV == 0)
 #define IMX_FEC_BASE			ENET_BASE_ADDR
-#define CONFIG_FEC_MXC_PHYADDR          0x2
+#define CONFIG_FEC_MXC_PHYADDR          0x1
 #define CONFIG_FEC_XCV_TYPE             RMII
 #ifdef CONFIG_DM_ETH
 #define CONFIG_ETHPRIME			"eth0"
@@ -355,7 +358,7 @@
 
 #define CONFIG_PHYLIB
 #define CONFIG_PHY_MICREL
-#define CONFIG_FEC_MXC_MDIO_BASE ENET2_BASE_ADDR
+#define CONFIG_FEC_MXC_MDIO_BASE ENET_BASE_ADDR
 #endif
 
 #define CONFIG_IMX_THERMAL

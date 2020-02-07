@@ -2145,6 +2145,7 @@ int drv_video_init(void)
 	bool __maybe_unused keyboard_ok = false;
 
 	/* Check if video initialization should be skipped */
+	set_panel_env();
 	if (board_video_skip())
 		return 0;
 
