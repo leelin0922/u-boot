@@ -926,7 +926,7 @@ unsigned char eeprom_i2c_get_EDID(void)
 {
 	return AT24c02_eeprom.data.display[2];
 }
-//#define CMDLINE_ADD_QUIET
+#define CMDLINE_ADD_QUIET
 #define CONSOLE_READWRITE_ABLE
 void set_kernel_env(int width, int height)
 {
