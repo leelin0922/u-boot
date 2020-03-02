@@ -12,9 +12,16 @@
 
 #include "mx6_common.h"
 
+/* #define CONFIG_SBC7112	1 */
+#ifdef CONFIG_SBC7819
+#ifndef CONFIG_SBC7112
 #define CONFIG_SBC7112	1
+#endif
+#endif
+
+#ifdef CONFIG_SBC7112
 #define CONFIG_EEPROM_GPIO_I2C4
-#define CONFIG_SBC7819
+#endif
 
 #ifdef CONFIG_SBC7819
 #define CONFIG_EDID_EEPROM_I2C2

@@ -1,6 +1,7 @@
 . /opt/fsl-imx-x11/4.9.88-2.0.0/environment-setup-cortexa9hf-neon-poky-linux-gnueabi
 #!/bin/sh
 
+find -iname "*.bak" -exec rm -rf {} \;
 #echo $PATH
 #echo $CROSS_COMPILE
 #export CROSS_COMPILE=/opt/fsl-imx-fb/4.1.15/environment-setup-cortexa9hf-vfp-neon-pokylinux-gnueabi
@@ -11,7 +12,11 @@ export ARCH=arm
 
 #make distclean
 #make clean
-make mx6dlsabresd_defconfig
+#make mx6dlsabresd_defconfig
+#make SBC7112S_defconfig
+#make SBC7112S2G_defconfig
+#make SBC7819S_defconfig
+make SBC7819S2G_defconfig
 make u-boot.imx
 
 echo "copy image (:u-boot-imx6dlsabresd_sd.imx"
