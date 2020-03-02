@@ -12,6 +12,7 @@
 
 #include "mx6_common.h"
 
+/* #define CONFIG_SBC7819	1 */
 /* #define CONFIG_SBC7112	1 */
 #ifdef CONFIG_SBC7819
 #ifndef CONFIG_SBC7112

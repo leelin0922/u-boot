@@ -2,6 +2,8 @@
 #!/bin/sh
 
 find -iname "*.bak" -exec rm -rf {} \;
+rm -f u-boot.imx
+rm -f u-boot-dtb.imx
 #echo $PATH
 #echo $CROSS_COMPILE
 #export CROSS_COMPILE=/opt/fsl-imx-fb/4.1.15/environment-setup-cortexa9hf-vfp-neon-pokylinux-gnueabi
@@ -19,9 +21,13 @@ export ARCH=arm
 make SBC7819S2G_defconfig
 make u-boot.imx
 
+sourcedir="tmp/deploy/images/imx6dlsabresd/"
+outputdir="/mnt/hgfs/dshare/7112/outputimage/"
+
 echo "copy image (:u-boot-imx6dlsabresd_sd.imx"
 #cp u-boot.imx /media/sf_share/7112/IMX6_L4.1.15_2.0.0_MFG-TOOL/Profiles/Linux/OS\ Firmware/files/u-boot-imx6dlsabresd_sd.imx
-cp u-boot.imx /mnt/hgfs/dshare/7112/IMX6_L4.1.15_2.0.0_MFG-TOOL/Profiles/Linux/OS\ Firmware/files/u-boot-imx6dlsabresd_sd.imx
+#cp u-boot.imx /mnt/hgfs/dshare/7112/IMX6_L4.1.15_2.0.0_MFG-TOOL/Profiles/Linux/OS\ Firmware/files/u-boot-imx6dlsabresd_sd.imx
+cp u-boot.imx "$outputdir"u-boot-imx6dlsabresd_sd.imx
 sync
 sleep 1
 echo "sync(:"

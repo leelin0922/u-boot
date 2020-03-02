@@ -325,6 +325,21 @@ config ARCH_FIXUP_FDT_MEMORY
 	  used for booting OS with different memory setup where the part of
 	  the memory location should be used for different purpose.
 
+config FB_BASE
+	bool "frame buffer"
+
+config EDID_EEPROM_I2C2
+	bool "edid from i2c2"
+
+config EEPROM_GPIO_I2C4
+	bool "gpio i2c4"
+
+config SBC7112
+	bool "SBC7112"
+
+config SBC7819
+	bool "SBC7819"
+
 endmenu		# Boot images
 
 source "api/Kconfig"
