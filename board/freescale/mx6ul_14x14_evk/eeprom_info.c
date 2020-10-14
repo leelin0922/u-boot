@@ -841,6 +841,10 @@ int Load_config_from_mmc(void)
 					prm_check++;
 					AT24c02_eeprom.data.display[3]=(uchar)(atoi(ptr+12)&0xff);
 				}
+				else
+				{
+					AT24c02_eeprom.data.display[3]=24;
+				}
 				ptr = strstr((const char *)tbuffer, "Frame_rate=");
 				if (ptr != NULL) 
 				{
@@ -861,12 +865,12 @@ int Load_config_from_mmc(void)
 					if(AT24c02_eeprom.data.display[2]<RESOLUTION_640X480 || AT24c02_eeprom.data.display[2]>RESOLUTION_1920X1080)
 						AT24c02_eeprom.data.display[2]=RESOLUTION_800X480;
 					if(AT24c02_eeprom.data.display[3]!=0x12 && AT24c02_eeprom.data.display[3]!=0x18)
-						AT24c02_eeprom.data.display[3]=0x12;
+						AT24c02_eeprom.data.display[3]=0x18;
 					if(AT24c02_eeprom.data.display[4]<0x28 || AT24c02_eeprom.data.display[4]>0x64)
 						AT24c02_eeprom.data.display[4]=0x3c;
 					//
 					if(AT24c02_eeprom.data.display[5]<1 || AT24c02_eeprom.data.display[5]>3)
-						AT24c02_eeprom.data.display[5]=1;
+						AT24c02_eeprom.data.display[5]=3;
 				}
 				ptr = strstr((const char *)tbuffer, "Logo=");
 				if (ptr != NULL) 
@@ -907,8 +911,8 @@ unsigned char eeprom_i2c_get_type(void)
 
 unsigned char eeprom_i2c_get_color_depth(void)
 {
-	if(AT24c02_eeprom.data.display[3]!=0x18)
-		AT24c02_eeprom.data.display[3]=0x12;
+	if(AT24c02_eeprom.data.display[3]!=0x12)
+		AT24c02_eeprom.data.display[3]=0x18;
 	return AT24c02_eeprom.data.display[3];
 }
 
@@ -926,7 +930,7 @@ unsigned char eeprom_i2c_get_EDID(void)
 {
 	return AT24c02_eeprom.data.display[2];
 }
-#define CMDLINE_ADD_QUIET
+//#define CMDLINE_ADD_QUIET
 #define CONSOLE_READWRITE_ABLE
 void set_kernel_env(int width, int height)
 {
@@ -941,11 +945,14 @@ void set_kernel_env(int width, int height)
 	if(AT24c02_eeprom.data.display[4]<30 || AT24c02_eeprom.data.display[4]>100)
 		AT24c02_eeprom.data.display[4]=60;
 	if(AT24c02_eeprom.data.display[3]!=18 && AT24c02_eeprom.data.display[3]!=24)
-		AT24c02_eeprom.data.display[3]=18;
+		AT24c02_eeprom.data.display[3]=24;
 //
 	switch(AT24c02_eeprom.data.display[5])
 	{//0x01:lvds, 0x02:hdmi, 0x03:RGB
+		default:
 		case 0x03:
+			AT24c02_eeprom.data.display[5]=0x03;
+			AT24c02_eeprom.data.display[3]=24;
 #ifdef CONFIG_GALCORE_VIVANTE
 			//sprintf(videoprm,"video=mxsfb:%dx%dM-%d@%u fbmem=8M ", width, height, AT24c02_eeprom.data.display[3], AT24c02_eeprom.data.display[4]);
 			//sprintf(videoprm,"video=mxcfb0:dev=lcd,CLAA-WVGA,if=RGB%d galcore.gpuProfiler=1 ", AT24c02_eeprom.data.display[3]==18?666:24);
@@ -967,7 +974,6 @@ void set_kernel_env(int width, int height)
 //			sprintf(videoprm,"video=mxcfb0:dev=hdmi,%dx%dM@%u,if=RGB24,bpp=32 video=mxcfb1:off video=mxcfb2:off fbmem=%dM", width, height, AT24c02_eeprom.data.display[4],192+24*AT24c02_eeprom.data.display[2]);
 			break;
 		case 0x01:
-		default:
 			AT24c02_eeprom.data.display[5]=0x01;
 #ifndef HARDWARE_EDID_EEPROM_I2C2
 			if(eeprom_i2c_get_EDID()==RESOLUTION_1920X1080)

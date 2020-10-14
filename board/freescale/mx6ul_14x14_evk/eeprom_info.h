@@ -5,7 +5,7 @@
 #define __EEPROM_H__
 
 #define EEPROM_I2C_BUS					0
-#define EEPROM_I2C_ADDRESS				0x51
+#define EEPROM_I2C_ADDRESS				0x50
 #define EEPROM_MAX_SIZE 				64
 #define EEPROM_ACCESSABLE_SIZE			64
 #define EEPROM_ADDRESS_LENGTH			1
