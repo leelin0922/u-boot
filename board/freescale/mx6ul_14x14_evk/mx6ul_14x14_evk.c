@@ -827,18 +827,25 @@ void do_enable_parallel_lcd(struct display_info_t const *dev)
 
 	/* Set Brightness to high */
 	gpio_request(IMX_GPIO_NR(1, 8), "backlight");
-	gpio_direction_output(IMX_GPIO_NR(1, 8) , 1);
+	if(eeprom_i2c_check_logo()!=0)
+		gpio_direction_output(IMX_GPIO_NR(1, 8) , 1);
+	else
+		gpio_direction_output(IMX_GPIO_NR(1, 8) , 0);
 
 	ret = gpio_lookup_name("gpio_spi@0_7", NULL, NULL, &gpio);
 	if (ret) {
 		printf("GPIO: 'gpio_spi@0_7' not found\n");
 	}
-
-	ret = gpio_request(gpio, "lcd_enable");
+#if 0
+	ret = gpio_request(IMX_GPIO_NR(1, 9), "lcd_enable");
 	if (ret && ret != -EBUSY) {
 		printf("gpio: requesting pin %u failed\n", gpio);
 	}
-	gpio_direction_output(gpio, 1);
+	//if(eeprom_i2c_check_logo()!=0)
+		gpio_direction_output(IMX_GPIO_NR(1, 9), 1);
+	//else
+	//	gpio_direction_output(IMX_GPIO_NR(1, 9), 0);
+#endif
 
 }
 

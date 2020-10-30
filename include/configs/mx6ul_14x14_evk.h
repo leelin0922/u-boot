@@ -137,8 +137,10 @@
 	"tee_file=undefined\0" \
 	"boot_fdt=try\0" \
 	"ip_dyn=no\0" \
-	"ipaddr=192.168.20.20\0" \
-	"serverip=192.168.20.168\0" \
+	"ethcat=ethernet@02188000\0" \
+	"ethaddr=00:01:02:03:04:05\0" \
+	"ipaddr=192.168.20.150\0" \
+	"serverip=192.168.20.155\0" \
 	"panel=TFT43AB\0" \
 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
 	"mmcpart=" __stringify(CONFIG_SYS_MMC_IMG_LOAD_PART) "\0" \
@@ -155,6 +157,7 @@
 	"loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
 	"loadtee=fatload mmc ${mmcdev}:${mmcpart} ${tee_addr} ${tee_file}\0" \
 	"mmcboot=echo Booting from mmc ...; " \
+		"printenv mmcargs; " \
 		"run mmcargs; " \
 		"if test ${tee} = yes; then " \
 			"run loadfdt; run loadtee; bootm ${tee_addr} - ${fdt_addr}; " \

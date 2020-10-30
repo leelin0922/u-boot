@@ -153,7 +153,7 @@
 
 #if defined(CONFIG_VIDEO_SW_CURSOR)
 void console_cursor(int state);
-
+extern void set_panel_env();
 #define CURSOR_ON  console_cursor(1)
 #define CURSOR_OFF console_cursor(0)
 #define CURSOR_SET video_set_cursor()
@@ -2109,6 +2109,14 @@ static int cfg_video_init(void)
 	eorx = fgx ^ bgx;
 
 	video_clear();
+	if(eeprom_i2c_check_logo()==0)
+	{
+		//unsigned long xres=get_panel_xres();
+		//printf("0x%x,0x%x,0x%x,0x%x\n", xres,yres,sizeof(bgx));
+		//memset(video_fb_address,0x0, (xres*yres)*4);
+		//memsetl(video_fb_address,		(VIDEO_VISIBLE_ROWS * VIDEO_LINE_LEN) / sizeof(int), 0x0);
+		return 0;
+	}
 
 #ifdef CONFIG_VIDEO_LOGO
 	/* Plot the logo and get start point of console */
