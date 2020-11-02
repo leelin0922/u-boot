@@ -1149,6 +1149,7 @@ void set_kernel_env(int width, int height)
 	#endif
 	}
 	setenv("mmcargs",envprm);
+	setenv("videoprm",videoprm);
 #endif
 	if(is_valid_ethaddr(AT24c02_eeprom.data.mac1+2))
 	{

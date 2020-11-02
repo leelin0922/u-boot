@@ -135,6 +135,7 @@
 	"fdt_addr=0x83000000\0" \
 	"tee_addr=0x84000000\0" \
 	"tee_file=undefined\0" \
+	"nfsroot=/tftpboot/rootfs\0" \
 	"boot_fdt=try\0" \
 	"ip_dyn=no\0" \
 	"ethcat=ethernet@02188000\0" \
@@ -176,10 +177,10 @@
 				"bootz; " \
 			"fi; " \
 		"fi;\0" \
-	"netargs=setenv bootargs console=${console},${baudrate} " \
+	"netargs=setenv bootargs console=${console},${baudrate} ${videoprm} " \
 		BOOTARGS_CMA_SIZE \
 		"root=/dev/nfs " \
-	"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
+	"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp \0" \
 		"netboot=echo Booting from net ...; " \
 		"run netargs; " \
 		"if test ${ip_dyn} = yes; then " \
