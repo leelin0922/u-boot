@@ -85,10 +85,13 @@ DECLARE_GLOBAL_DATA_PTR;
 //#define LVDS_VCC_PORT1	IMX_GPIO_NR(3, 16)
 //#define LVDS_VCC_PORT2	IMX_GPIO_NR(3, 17)
 
+#ifdef HARDWARE_SBC7819
+extern unsigned char EMERSON_480x240_256[];
+extern int EMERSON_480x240_256_size;
+#endif
 extern unsigned char fsl_bmp_reversed_600x400[];
 extern int fsl_bmp_reversed_600x400_size;
 extern int g_ipu_hw_rev;
-
 extern int video_display_bitmap(ulong bmp_image, int x, int y);
 #ifndef GPIO_GDIR
 #define GPIO_GDIR	4
@@ -96,6 +99,9 @@ extern int video_display_bitmap(ulong bmp_image, int x, int y);
 #ifndef GPIO_DR
 #define GPIO_DR		0
 #endif
+
+static struct logoinfo logoindex;
+
 void set_LVDS_VCC(int status)
 {
 	unsigned int reg;
@@ -129,7 +135,7 @@ void set_LVDS_VCC(int status)
 	return ;
 }
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 // Hertz 20180529: keep led amber solid when operation system starting
 // LED1(Green):NANDF_D2(GPIO2_IO02)-->GPIO_LED1-->LED1
 // LED2(Red):NANDF_D3(GPIO2_IO03)-->GPIO_LED2-->LED2
@@ -200,7 +206,7 @@ void set_panel_env(void)
 	}
 
 	Load_config_from_mmc();
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 	if(get_eeprom_efficient_config() == 0) { 
 		// use EDID config
 		setenv("panel", get_edid_eeprom_panel_name());
@@ -282,6 +288,47 @@ void copy_bmp_screen(char * destaddr,char * srcaddr, int width,int high)
 			offset=0x436+width*(high/2-bmphigh/2+i)+(width -bmpwidth)/2;
 		if(eeprom_i2c_pass_logo()==0)
 			memcpy((char *)destaddr+offset, (char *)srcaddr+(u32)(0x436+bmpwidth*i),bmpwidth);
+		else
+			memcpy((char *)destaddr+offset, (char *)fsl_bmp_reversed_pass+(u32)(0x436+bmpwidth*i),bmpwidth);
+	}
+}
+
+void copy_logo_screen(char * destaddr, struct logoinfo * logodata, int width,int high)
+{
+	u32 offset=0x0;
+	int i=0;
+	int bmpwidth=logodata->width;
+	int bmphigh=logodata->high;
+	extern unsigned char fsl_bmp_reversed_pass[];
+//	char tmp[128]={0};
+
+	memset((char *)destaddr, 0x0, (width+2)*high+0x436);
+	if(eeprom_i2c_check_logo()==0)
+		return;
+	if(eeprom_i2c_pass_logo()==0)
+	{
+		bmpwidth=get_bmp_4byte((char *) logodata->buffer+18);
+		bmphigh=get_bmp_4byte((char *) logodata->buffer+22);
+		memcpy((char *)destaddr, (char *)logodata->buffer,0x436);
+	}
+	else
+	{
+		bmpwidth=get_bmp_4byte((char *) fsl_bmp_reversed_pass+18);
+		bmphigh=get_bmp_4byte((char *) fsl_bmp_reversed_pass+22);
+		memcpy((char *)destaddr, (char *)fsl_bmp_reversed_pass,0x436);
+	}
+//	sprintf(tmp,"(%d,%d)\n",bmpwidth,bmphigh);
+//	puts(tmp);
+	set_bmp_header(destaddr,width,high);
+	if(width==1366)width=1368;
+	for(i=0;i<bmphigh;i++)
+	{
+		if(width==1920)
+			offset=0x436+width*(high/2-bmphigh/2+i)+(width -bmpwidth)/2-430;
+		else
+			offset=0x436+width*(high/2-bmphigh/2+i)+(width -bmpwidth)/2;
+		if(eeprom_i2c_pass_logo()==0)
+			memcpy((char *)destaddr+offset, (char *)logodata->buffer+(u32)(0x436+bmpwidth*i),bmpwidth);
 		else
 			memcpy((char *)destaddr+offset, (char *)fsl_bmp_reversed_pass+(u32)(0x436+bmpwidth*i),bmpwidth);
 	}
@@ -466,7 +513,7 @@ static struct i2c_pads_info i2c_pad_info1 = {
 	}
 };
 #endif
-#ifndef CONFIG_EEPROM_GPIO_I2C4
+#ifndef HARDWARE_EEPROM_GPIO_I2C4
 static struct i2c_pads_info i2c_pad_info2 = {
 	.scl = {
 		.i2c_mode = MX6_PAD_GPIO_3__I2C3_SCL | I2C_PAD,
@@ -561,7 +608,7 @@ struct fsl_esdhc_cfg usdhc_cfg[3] = {
 	{USDHC4_BASE_ADDR},
 };
 
-#ifndef CONFIG_SBC7112
+#ifndef HARDWARE_SBC7112
 #define USDHC2_CD_GPIO	IMX_GPIO_NR(2, 2)
 #define USDHC3_CD_GPIO	IMX_GPIO_NR(2, 0)
 #else
@@ -586,7 +633,7 @@ int board_mmc_getcd(struct mmc *mmc)
 
 	switch (cfg->esdhc_base) {
 	case USDHC2_BASE_ADDR:
-#ifndef CONFIG_SBC7112
+#ifndef HARDWARE_SBC7112
 		ret = !gpio_get_value(USDHC2_CD_GPIO);
 #else
 		ret =0; /* aplex */
@@ -621,7 +668,7 @@ int board_mmc_init(bd_t *bis)
 		case 0:
 			imx_iomux_v3_setup_multiple_pads(
 				usdhc2_pads, ARRAY_SIZE(usdhc2_pads));
-#ifndef CONFIG_SBC7112
+#ifndef HARDWARE_SBC7112
 			gpio_request(USDHC2_CD_GPIO, "USDHC2 CD");
 			gpio_direction_input(USDHC2_CD_GPIO);
 #endif
@@ -973,12 +1020,20 @@ void lvds_backlight(int status)
 	//writel(reg, GPIO6_BASE_ADDR+ GPIO_GDIR);
 	if(status)
 	{
+		reg=readl(GPIO1_BASE_ADDR+ GPIO_DR);
+		reg |= (5<<19);
+		writel(reg, GPIO1_BASE_ADDR+ GPIO_DR);
+
 		reg=readl(GPIO6_BASE_ADDR+ GPIO_DR);
 		reg |= (3<<15);
 		writel(reg, GPIO6_BASE_ADDR+ GPIO_DR);
 	}
 	else
 	{
+		reg=readl(GPIO1_BASE_ADDR+ GPIO_DR);
+		reg &= ~(5<<19);
+		writel(reg, GPIO1_BASE_ADDR+ GPIO_DR);
+
 		reg=readl(GPIO6_BASE_ADDR+ GPIO_DR);
 		reg &= ~(3<<15);
 		writel(reg, GPIO6_BASE_ADDR+ GPIO_DR);
@@ -1521,7 +1576,7 @@ int board_init(void)
 	gd->bd->bi_boot_params = PHYS_SDRAM + 0x100;
 	imx_iomux_v3_setup_pad(MX6_PAD_EIM_D16__GPIO3_IO16 | MUX_PAD_CTRL(NO_PAD_CTRL));
 	imx_iomux_v3_setup_pad(MX6_PAD_EIM_D17__GPIO3_IO17 | MUX_PAD_CTRL(NO_PAD_CTRL));
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 	set_panel_bicolor_led_on(3);
 #endif
 	set_LVDS_VCC(0);
@@ -1533,7 +1588,7 @@ int board_init(void)
 	setup_i2c(1, CONFIG_SYS_I2C_SPEED, 0x7f, &i2c_pad_info1);
 #endif
 
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 	/* GPIO to I2C4  SCL*/
 	imx_iomux_v3_setup_pad(MX6_PAD_ENET_TX_EN__GPIO1_IO28 | MUX_PAD_CTRL(NO_PAD_CTRL));
 	/* GPIO to I2C4 SDA*/
@@ -1570,7 +1625,7 @@ int board_init(void)
 	setup_fec();
 #endif
 	set_LVDS_VCC(1);
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 	set_panel_bicolor_led_on(2);
 #endif
 
@@ -1956,12 +2011,12 @@ static void customer_lvds(int lvds_ipu,int lvds_di)
 {
 	unsigned int reg=0;
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 	uchar color_depth=get_edid_eeprom_color_depth();
 #else
 	uchar color_depth=eeprom_i2c_get_color_depth();
 #endif
-	uchar display_type=eeprom_i2c_get_type();
+	//uchar display_type=eeprom_i2c_get_type();
 	uchar display_edid=eeprom_i2c_get_EDID();
 
 #if (LVDS_PORT == 0)
@@ -2065,8 +2120,8 @@ int board_late_init(void)
 	int mmc_dev = mmc_get_env_devno();
 	struct mmc *mmc = find_mmc_device(mmc_dev);
 
-	pData = (unsigned char *)CONFIG_FB_BASE;
-#if 0
+	pData = (unsigned char *)HARDWARE_FB_BASE;
+	#if 0
 	if (mmc)	{
 		if (mmc_init(mmc) == 0) {
 			start = ALIGN(UBOOT_LOGO_BMP_ADDR, mmc->read_bl_len) / mmc->read_bl_len;
@@ -2075,69 +2130,70 @@ int board_late_init(void)
 			bmpReady = 1;
 		}
 	}
-#endif
+	#endif
 
 	if (bmpReady == 0) {
 		// Fill RGB frame buffer
 		// Red
 		for (i = 0; i < (DISPLAY_WIDTH * DISPLAY_HEIGHT * (DISPLAY_BPP / 8) / 3); i += (DISPLAY_BPP / 8)) {
-#if (DISPLAY_BPP == 16)
+	#if (DISPLAY_BPP == 16)
 			pData[i + 0] = 0x00;
 			pData[i + 1] = 0xF8;
-#else
+	#else
 			pData[i + 0] = 0x00;
 			pData[i + 1] = 0x00;
 			pData[i + 2] = 0xFF;
 			pData[i + 3] = 0x00;
-#endif
+	#endif
 		}
 
 		// Green
 		for (; i < (DISPLAY_WIDTH * DISPLAY_HEIGHT * (DISPLAY_BPP / 8) / 3) * 2; i += (DISPLAY_BPP / 8)) {
-#if (DISPLAY_BPP == 16)
+	#if (DISPLAY_BPP == 16)
 			pData[i + 0] = 0xE0;
 			pData[i + 1] = 0x07;
-#else
+	#else
 			pData[i + 0] = 0x00;
 			pData[i + 1] = 0xFF;
 			pData[i + 2] = 0x00;
 			pData[i + 3] = 0x00;
-#endif
+	#endif
 		}
 
 		// Blue
 		for (; i < DISPLAY_WIDTH * DISPLAY_HEIGHT * (DISPLAY_BPP / 8); i += (DISPLAY_BPP / 8)) {
-#if (DISPLAY_BPP == 16)
+	#if (DISPLAY_BPP == 16)
 			pData[i + 0] = 0x1F;
 			pData[i + 1] = 0x00;
-#else
+	#else
 			pData[i + 0] = 0xFF;
 			pData[i + 1] = 0x00;
 			pData[i + 2] = 0x00;
 			pData[i + 3] = 0x00;
-#endif
+	#endif
 		}
 	}
-#ifndef CONFIG_SYS_DCACHE_OFF
+	#ifndef CONFIG_SYS_DCACHE_OFF
 	flush_dcache_range((u32)pData, (u32)(pData + DISPLAY_WIDTH * DISPLAY_HEIGHT * (DISPLAY_BPP / 8)));
-#endif
+	#endif
 
-#ifdef IPU_OUTPUT_MODE_LVDS
+	#ifdef IPU_OUTPUT_MODE_LVDS
 	setup_lvds_iomux();
-#endif
+	#endif
 
-#ifdef IPU_OUTPUT_MODE_LCD
+	#ifdef IPU_OUTPUT_MODE_LCD
 	ipu_iomux_config();
 	setup_lcd_iomux();
-#endif
+	#endif
 
-#ifdef IPU_OUTPUT_MODE_HDMI
+	#ifdef IPU_OUTPUT_MODE_HDMI
 	setup_hdmi_iomux();
-#endif
+	#endif
 
 	ipu_display_setup(IPU_NUM, DI_NUM);
 #else
-	pData = (unsigned char *)CONFIG_FB_BASE;
+  #ifndef LVDS_NO_INIT
+	pData = (unsigned char *)HARDWARE_FB_BASE;
  	if(LVDS_PORT==1)
  	{
 		clocksource=MXC_IPU1_LVDS_DI1_CLK;//MXC_IPU1_LVDS_DI0_CLK,MXC_IPU1_LVDS_DI1_CLK		
@@ -2148,76 +2204,115 @@ int board_late_init(void)
 		clocksource=MXC_IPU1_LVDS_DI0_CLK;
 		customer_lvds(1,0);
 	}
-#ifdef CONFIG_EDID_EEPROM_I2C2
+	#ifdef HARDWARE_SBC7819
+	//extern unsigned char EMERSON_480x240_256[];
+	logoindex.high=240;
+	logoindex.width=480;
+	logoindex.size=EMERSON_480x240_256_size;
+	logoindex.buffer= &EMERSON_480x240_256[0];
+
+	#else
+	//extern unsigned char fsl_bmp_reversed_600x400[];
+	logoindex.high=168;
+	logoindex.width=280;
+	logoindex.size=fsl_bmp_reversed_600x400_size;
+	logoindex.buffer= &fsl_bmp_reversed_600x400[0];
+	#endif
+  #endif
+	#ifdef HARDWARE_EDID_EEPROM_I2C2
 	if(get_eeprom_efficient_config() == 0) 
 	{
 		if(get_edid_eeprom_resolution_num() == RESOLUTION_1920X1080) 
 		{
-			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400, get_edid_eeprom_xres(), get_edid_eeprom_yres());
+			//copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400, get_edid_eeprom_xres(), get_edid_eeprom_yres());
+	  #ifndef LVDS_NO_INIT
+			copy_logo_screen((char *)pData, &logoindex, get_edid_eeprom_xres(), get_edid_eeprom_yres());
 			display_split_clk_config(MXC_IPU1_LVDS_DI1_CLK, get_edid_eeprom_pixel_frequency() * 10000);
+	  #endif
 			//display_split_clk_config(MXC_IPU1_LVDS_DI0_CLK, get_edid_eeprom_pixel_frequency() * 10000);
 			set_kernel_env(get_edid_eeprom_xres(), get_edid_eeprom_yres());
 		} 
 		else 
 		{
+			//copy_bmp_screen((char *)pData, (char *)fsl_bmp_reversed_600x400, get_edid_eeprom_xres(), get_edid_eeprom_yres());
+	  #ifndef LVDS_NO_INIT
+			copy_logo_screen((char *)pData, &logoindex, get_edid_eeprom_xres(), get_edid_eeprom_yres());
 			display_clk_config(clocksource, get_edid_eeprom_pixel_frequency() * 10000);
+	  #endif
 			set_kernel_env(get_edid_eeprom_xres(), get_edid_eeprom_yres());
-			copy_bmp_screen((char *)pData, (char *)fsl_bmp_reversed_600x400, get_edid_eeprom_xres(), get_edid_eeprom_yres());
 		}
 	} 
 	else
-#endif
+	#endif
 	switch(eeprom_i2c_get_EDID())
 	{
 		//setenv("bootargs","console=ttymxc0,115200 init=/init video=mxcfb0:dev=ldb,800x480M@70,if=RGB666,bpp=32 video=mxcfb1:off video=mxcfb2:off fbmem=40M fb0base=0x27b00000 vmalloc=400M androidboot.console=ttymxc0 androidboot.hardware=freescale mem=1024M\0");
 		case RESOLUTION_640X480:
+  #ifndef LVDS_NO_INIT
+  			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,640,480);
 			display_clk_config(clocksource, 34285715);
-			set_kernel_env(640,480);
-			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,640,480);
+  #endif
+  			set_kernel_env(640,480);
 			break;
 		default:
 		case RESOLUTION_800X480:
+  #ifndef LVDS_NO_INIT
 			display_clk_config(clocksource, 38000000);
-			set_kernel_env(800,480);
 			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,800,480);
+  #endif
+			set_kernel_env(800,480);
 			break;
 		case RESOLUTION_800X600:
-			display_clk_config(clocksource, 38000000);
-			set_kernel_env(800,600);
+  #ifndef LVDS_NO_INIT
 			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,800,600);
+			display_clk_config(clocksource, 38000000);
+  #endif
+			set_kernel_env(800,600);
 			break;
 		case RESOLUTION_1024X600:
+  #ifndef LVDS_NO_INIT
 			//display_clk_config(clocksource, 51206400);
-			display_clk_config(clocksource, 47000000);
-			set_kernel_env(1024,600);
 			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,1024,600);
+			display_clk_config(clocksource, 47000000);
+  #endif
+			set_kernel_env(1024,600);
 			break;
 		case RESOLUTION_1024X768:
-			display_clk_config(clocksource, 64000000);
-			set_kernel_env(1024,768);
+  #ifndef LVDS_NO_INIT
 			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,1024,768);
+			display_clk_config(clocksource, 64000000);
+  #endif
+			set_kernel_env(1024,768);
 			break;
 		case RESOLUTION_1280X800:
+  #ifndef LVDS_NO_INIT
+			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,1280,800);
 			//display_clk_config(clocksource, 65000000);
 			display_clk_config(clocksource, 80000000);
+  #endif
 			set_kernel_env(1280,800);
-			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,1280,800);
 			break;
 		case RESOLUTION_1366X768:
-			display_clk_config(clocksource, 74000000);
-			set_kernel_env(1366,768);
+  #ifndef LVDS_NO_INIT
 			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,1366,768);
+			display_clk_config(clocksource, 74000000);
+  #endif
+			set_kernel_env(1366,768);
 			break;
 		case RESOLUTION_1920X1080:
+  #ifndef LVDS_NO_INIT
 			copy_bmp_screen((char *)pData,(char *)fsl_bmp_reversed_600x400,1920,1080);
 			//display_split_clk_config(MXC_IPU1_LVDS_DI1_CLK, 83000000);
 			display_split_clk_config(MXC_IPU1_LVDS_DI0_CLK, 65000000);
+  #endif
 			set_kernel_env(1920,1080);
 			break;
 	}
-//	pData = (unsigned char *)CONFIG_FB_BASE;
+//	pData = (unsigned char *)HARDWARE_FB_BASE;
 //	memcpy(pData,fsl_bmp_reversed_600x400,fsl_bmp_reversed_600x400_size);
+  #ifndef LVDS_NO_INIT
 	video_display_bitmap((ulong)pData,0,0);
+  #endif
 #endif
 
 #ifdef CONFIG_CMD_BMODE
@@ -2244,11 +2339,15 @@ int board_late_init(void)
 	board_late_mmc_env_init();
 #endif
 
+#ifndef LVDS_NO_INIT
 	if(eeprom_i2c_check_logo())
 	{
 		lvds_backlight(1);
 	}
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#else
+	lvds_backlight(0);
+#endif
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 	set_panel_bicolor_led_on(3);
 #endif
 	return 0;

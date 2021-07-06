@@ -26,7 +26,7 @@ extern void puts(const char *str);
 extern void udelay(unsigned long usec);
 //#define CONFIG_GALCORE_VIVANTE 
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 // variable
 struct edid_eeprom_info edid_eeprom;
 // function
@@ -37,7 +37,7 @@ static void combine_panel_name(void);
 struct eeprom_info AT24c02_eeprom;
 struct udevice *dev;
 
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 #define GPIO_I2C_SCL	IMX_GPIO_NR(1, 28)
 #define GPIO_I2C_SDA	IMX_GPIO_NR(1, 29)
 /*	gpio i2c speed 
@@ -441,7 +441,7 @@ int eeprom_i2c_parse_data(void)
 	int datalength=0;
 
 	//if (AT24c02_eeprom.read( 0xfe, 1, buffer, 2)) {
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 		if (i2c_gpio_read_eeprom( 0xfe, 1, buffer, 2)) {
 #else
 		if (eeprom_i2c_read( 0xfe, 1, buffer, 2)) {
@@ -460,7 +460,7 @@ int eeprom_i2c_parse_data(void)
 	else
 	{
 		//AT24c02_eeprom.read( 0x00, 1, AT24c02_eeprom.content, 0x40);
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 		i2c_gpio_read_eeprom( 0x00, 1, AT24c02_eeprom.content, 0x40);
 #else
 		eeprom_i2c_read( 0x00, 1, AT24c02_eeprom.content, 0x40);
@@ -616,7 +616,7 @@ int eeprom_i2c_synthesis_data(void)
 	while(write_size_offset<AT24c02_eeprom.size)
 	{
 		//AT24c02_eeprom.write(write_size_offset, 1, AT24c02_eeprom.content+write_size_offset, 8);
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 		i2c_gpio_write_eeprom(write_size_offset, 1, AT24c02_eeprom.content+write_size_offset, 8);
 #else
 		eeprom_i2c_write(write_size_offset, 1, AT24c02_eeprom.content+write_size_offset, 8);
@@ -627,7 +627,7 @@ int eeprom_i2c_synthesis_data(void)
 	eepromtmp[0]=0xff & AT24c02_eeprom.data.version;
 	eepromtmp[1]=0xff & (AT24c02_eeprom.data.version>>8);
 	//AT24c02_eeprom.write(0xfe, 1, eepromtmp, 2);
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 	i2c_gpio_write_eeprom(0xfe, 1, eepromtmp, 2);
 #else
 	eeprom_i2c_write(0xfe, 1, eepromtmp, 2);
@@ -927,7 +927,7 @@ void set_kernel_env(int width, int height)
 		case 0x01:
 		default:
 			AT24c02_eeprom.data.display[5]=0x01;
-#ifndef CONFIG_EDID_EEPROM_I2C2
+#ifndef HARDWARE_EDID_EEPROM_I2C2
 			if(eeprom_i2c_get_EDID()==RESOLUTION_1920X1080)
 			{
 	#ifdef CONFIG_GALCORE_VIVANTE
@@ -997,7 +997,7 @@ void set_kernel_env(int width, int height)
 	if(AT24c02_eeprom.data.backlight[0]==0x04 && AT24c02_eeprom.data.backlight[1]==0x04)
 	{
 		int check_backlight_frequency=AT24c02_eeprom.data.backlight[4]*256+AT24c02_eeprom.data.backlight[5];
-	#ifdef CONFIG_SBC7819
+	#ifdef HARDWARE_SBC7819
 		check_backlight_frequency=200;
 	#endif
 	#ifndef BACKLIGHT_MAX
@@ -1017,7 +1017,7 @@ void set_kernel_env(int width, int height)
 	if(AT24c02_eeprom.data.backlight[0]==0x04 && AT24c02_eeprom.data.backlight[1]>=0x04)
 	{
 		int check_backlight_frequency=AT24c02_eeprom.data.backlight[4]*256+AT24c02_eeprom.data.backlight[5];
-	#ifdef CONFIG_SBC7819
+	#ifdef HARDWARE_SBC7819
 		check_backlight_frequency=200;
 	#endif
 	#ifndef BACKLIGHT_MAX
@@ -1071,7 +1071,7 @@ int eeprom_i2c_init(void)
 	AT24c02_eeprom.address_length = EEPROM_ADDRESS_LENGTH;
 	AT24c02_eeprom.mmc_bus = MMC_DEVICE_BUS;
 
-//#ifdef CONFIG_EEPROM_GPIO_I2C4
+//#ifdef HARDWARE_EEPROM_GPIO_I2C4
 //	AT24c02_eeprom.read = i2c_gpio_read_eeprom;
 //	AT24c02_eeprom.write = i2c_gpio_write_eeprom;
 //#else
@@ -1086,18 +1086,18 @@ int eeprom_i2c_init(void)
 	AT24c02_eeprom.mHalt=0;
 	AT24c02_eeprom.mbootdelay=0;
 
-#ifdef CONFIG_EEPROM_GPIO_I2C4
+#ifdef HARDWARE_EEPROM_GPIO_I2C4
 	i2c_gpio_eeprom_init();
 #endif
 	eeprom_i2c_parse_data();
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 	// Hertz 20180524:
 	edid_eeprom_i2c_parse_data();
 #endif
 	return 0;
 }
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 static unsigned int edid_eeprom_i2c_read( unsigned int addr, int alen, uint8_t *buffer, int len )
 {
 #ifdef CONFIG_SYS_I2C

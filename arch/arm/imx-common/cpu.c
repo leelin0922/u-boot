@@ -319,7 +319,7 @@ void arch_preboot_os(void)
 #endif
 #if defined(CONFIG_VIDEO_IPUV3)
 	/* disable video before launching O/S */
-#ifndef CONFIG_SBC7112
+#ifndef HARDWARE_SBC7112
 	ipuv3_fb_shutdown();
 #endif
 #endif

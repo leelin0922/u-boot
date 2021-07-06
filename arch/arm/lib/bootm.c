@@ -31,7 +31,7 @@
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
-#ifdef CONFIG_SBC7112
+#ifdef HARDWARE_SBC7112
 extern void lvds_backlight(int status);
 #endif
 static struct tag *params;
@@ -79,9 +79,9 @@ static void announce_and_cleanup(int fake)
 {
 	printf("\nStarting kernel ...arm%s", fake ?
 		"(fake run for tracing)" : "");
-#ifdef CONFIG_SBC7112
-	lvds_backlight(0);
-#endif
+//#ifdef HARDWARE_SBC7112
+//	lvds_backlight(0);
+//#endif
 	bootstage_mark_name(BOOTSTAGE_ID_BOOTM_HANDOFF, "start_kernel");
 #ifdef CONFIG_BOOTSTAGE_FDT
 	bootstage_fdt_add_report();

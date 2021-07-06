@@ -25,12 +25,13 @@
 #define CONSOLE_DEV		"ttymxc0"
 #define CONFIG_MMCROOT			"/dev/mmcblk2p2"  /* SDHC3 */
 
+#define HARDWARE_MX6DL_RAM2G
 #if defined(CONFIG_MX6QP)
 #define PHYS_SDRAM_SIZE		(1u * 1024 * 1024 * 1024)
 #elif defined(CONFIG_MX6Q)
 #define PHYS_SDRAM_SIZE		(1u * 1024 * 1024 * 1024)
 #elif defined(CONFIG_MX6DL)
-	#ifdef CONFIG_MX6DL_RAM2G
+	#ifdef HARDWARE_MX6DL_RAM2G
 #define PHYS_SDRAM_SIZE		(2u * 1024 * 1024 * 1024)
 	#else
 #define PHYS_SDRAM_SIZE		(1u * 1024 * 1024 * 1024)

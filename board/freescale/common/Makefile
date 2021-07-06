@@ -71,6 +71,7 @@ endif
 
 obj-$(CONFIG_LS102XA_STREAM_ID)	+= ls102xa_stream_id.o
 obj-${CONFIG_SPLASH_SCREEN}	+= fsl_bmp_reversed_600x400.o
+obj-${CONFIG_SPLASH_SCREEN}	+= EMERSON_480x240_256.o
 
 # deal with common files for P-series corenet based devices
 obj-$(CONFIG_TARGET_P2041RDB)	+= p_corenet/

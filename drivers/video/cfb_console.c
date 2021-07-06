@@ -2138,7 +2138,7 @@ __weak int board_video_skip(void)
 	return 0;
 }
 
-#ifdef CONFIG_SBC7112
+#ifdef HARDWARE_SBC7112
 extern void set_panel_env(void);
 #endif
 
@@ -2150,7 +2150,7 @@ int drv_video_init(void)
 
 	/* Check if video initialization should be skipped */
 	//printf("%s:%s:%i: here i am\n", __FILE__, __func__, __LINE__);
-#ifdef CONFIG_SBC7112
+#ifdef HARDWARE_SBC7112
 	set_panel_env();
 #endif
 	if (board_video_skip())

@@ -11,7 +11,7 @@
 #define EEPROM_ADDRESS_LENGTH			1
 #define MMC_DEVICE_BUS					1
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 #define EDID_EEPROM_I2C_BUS				1		// I2C2
 #define EDID_EEPROM_I2C_ADDRESS			0x50
 #endif
@@ -75,7 +75,7 @@ struct eeprom_info
 	unsigned char mServerip[16];
 };
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 struct edid_eeprom_info
 {
 	u8 efficient_config; // 0=EDID(High priority) 1=SD card(Low priority) 2=default config
@@ -100,6 +100,14 @@ struct edid_eeprom_info
 };
 #endif
 
+struct logoinfo
+{
+	int high;
+	int width;
+	int size;
+	unsigned char * buffer;
+};
+
 unsigned int eeprom_i2c_read(unsigned int addr, int alen, uint8_t *buffer, int len);
 unsigned int eeprom_i2c_write(unsigned int addr, int alen, uint8_t *buffer, int len);
 
@@ -115,10 +123,11 @@ int eeprom_i2c_synthesis_data(void);
 int Load_config_from_mmc(void);
 int eeprom_i2c_init(void);
 
-#ifdef CONFIG_EDID_EEPROM_I2C2
+#ifdef HARDWARE_EDID_EEPROM_I2C2
 int edid_eeprom_i2c_parse_data(void);
 unsigned char get_eeprom_efficient_config(void);
 unsigned char get_edid_eeprom_color_depth(void);
+unsigned char eeprom_i2c_get_type(void);
 unsigned char get_edid_eeprom_resolution_num(void);
 u32 get_edid_eeprom_pixel_frequency(void);
 u32 get_edid_eeprom_xres(void);
