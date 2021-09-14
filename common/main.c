@@ -57,6 +57,16 @@ void main_loop(void)
 	if (IS_ENABLED(CONFIG_EFI_CAPSULE_ON_DISK_EARLY))
 		efi_launch_capsules();
 
+	if(env_get("Halt"))
+		env_set("bootdelay","-1");
+	else
+	{
+		if(env_get("mbootdelay"))
+			env_set("bootdelay",env_get("mbootdelay"));
+		else
+			env_set("bootdelay","0");
+	}
+
 	s = bootdelay_process();
 	if (cli_process_fdt(&s))
 		cli_secure_boot_cmd(s);

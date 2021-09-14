@@ -13,6 +13,17 @@
 #include "mx6_common.h"
 #include "imx_env.h"
 
+#define CONFIG_SBC7112	1
+#define CONFIG_EEPROM_GPIO_I2C4
+/* #define CONFIG_SBC7819 */
+
+#ifdef CONFIG_SBC7819
+#define CONFIG_EDID_EEPROM_I2C2
+#define LVDS_PORT		0
+#else
+#define LVDS_PORT		1
+#endif
+
 /* Size of malloc() pool */
 #define CONFIG_SYS_MALLOC_LEN		(16 * SZ_1M)
 

@@ -12,7 +12,9 @@
 #ifdef CONFIG_IMX_HDMI
 #include <asm/arch/mxc_hdmi.h>
 #include <asm/io.h>
-
+#ifdef CONFIG_SBC7112
+extern void set_panel_env(void);
+#endif
 int detect_hdmi(struct display_info_t const *dev)
 {
 	struct hdmi_regs *hdmi	= (struct hdmi_regs *)HDMI_ARB_BASE_ADDR;
@@ -24,6 +26,9 @@ int board_video_skip(void)
 {
 	int i;
 	int ret = 0;
+#ifdef CONFIG_SBC7112
+	set_panel_env();
+#endif
 	char const *panel = env_get("panel");
 
 	if (!panel) {

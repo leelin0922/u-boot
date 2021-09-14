@@ -51,6 +51,10 @@
 #endif
 #define CONFIG_SYS_LOAD_ADDR	CONFIG_LOADADDR
 
+#ifndef CONFIG_BOOTDELAY
+#define CONFIG_BOOTDELAY	0
+#endif
+
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_CBSIZE	1024
 #define CONFIG_SYS_MAXARGS	32
