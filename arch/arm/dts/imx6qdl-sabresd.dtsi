@@ -1162,6 +1162,7 @@
 	pinctrl-0 = <&pinctrl_usdhc3>;
 	bus-width = <4>;
 	//bus-width = <8>;
+	max-frequency = <50000000>;
 	cd-gpios = <&gpio4 10 GPIO_ACTIVE_LOW>;
 	//cd-gpios = <&gpio2 0 GPIO_ACTIVE_LOW>;
 	//wp-gpios = <&gpio2 1 GPIO_ACTIVE_HIGH>;

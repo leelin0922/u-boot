@@ -639,11 +639,13 @@ int eeprom_i2c_synthesis_data(void)
 	return AT24c02_eeprom.version;
 }
 
+#define SDCARD_DEVICE		2
+#define SDCARD_DEVICE_PART	1
 int Load_config_from_mmc(void)
 {
 	struct mmc *mmc;
 
-	mmc = find_mmc_device(2);
+	mmc = find_mmc_device(SDCARD_DEVICE);
 	if (mmc) 
 	{
 		mmc_init(mmc);
@@ -666,10 +668,10 @@ int Load_config_from_mmc(void)
 		unsigned int prm_check=0;
 				
 		//dev_desc=get_dev("mmc",1);
-		dev_desc = blk_get_dev("mmc", 1);
+		dev_desc = blk_get_dev("mmc", SDCARD_DEVICE);
 		if (dev_desc!=NULL) 
 		{
-			if (fat_register_device((struct blk_desc *)dev_desc,1)==0) 
+			if (fat_register_device((struct blk_desc *)dev_desc,SDCARD_DEVICE_PART)==0) 
 			{
 				size = file_fat_read ("jo6wu06.cfg", (void *) tbuffer, sizeof(tbuffer));
 				if(size<=0)return -1;
